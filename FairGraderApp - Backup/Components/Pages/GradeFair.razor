@@ -1,0 +1,227 @@
+@page "/schule/{schuleid}/klasse/{klasseid}/gradefair"
+@rendermode InteractiveServer
+@inject FG_FairGrader FairGrader
+@inject NavigationManager NavigationManager
+@using FairGraderApp.Models
+
+<PageTitle>FairGrade</PageTitle>
+
+<button type="button" class="btn border-0 bg-transparent p-0 mb-3" @onclick="BackToKlasse">
+    <div class="d-flex align-items-center">
+        <div class="p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+            </svg>
+        </div>
+        @(klasse?.Name ?? "Zurück")
+    </div>
+</button>
+
+@if (schule is null || klasse is null)
+{
+    <h1>FairGrade</h1>
+    <div class="alert alert-warning">Die angegebenen Daten konnten nicht geladen werden.</div>
+}
+else if (klasse.SortList.Count == 0)
+{
+    <h1>FairGrade</h1>
+    <div class="alert alert-info">Keine Schüler in der Sortierungsliste vorhanden.</div>
+}
+else if (aktuellerSchueler is null)
+{
+    <h1>FairGrade</h1>
+    <div class="alert alert-success">Alle Schüler wurden bewertet!</div>
+}
+else
+{
+    <h1>FairGrade</h1>
+    <div class="text-muted mb-3">
+        @if (klasse.Name != "")
+        {
+            <span class="me-2">Klasse: @klasse.Name (@klasse.Stufe@klasse.Zug)</span>
+        }
+        else
+        {
+            <span class="me-2">Klasse: @klasse.Stufe@klasse.Zug</span>
+        }        
+        <span class="text-info">(@(aktueller + 1) / @klasse.SortList.Count)</span>
+    </div>
+
+    <!-- Container für animierte Schülerdarstellung -->
+    <div class="schueler-container">
+        @if (!isAnimating && aktuellerSchueler is not null)
+        {
+            <div class="card schueler-card @animationClass" 
+                 key="@($"{aktuellerSchueler.Id}-{aktueller}")">
+                <div class="card-body text-center">
+                    <h3 class="card-title">@aktuellerSchueler.Vorname @aktuellerSchueler.Name</h3>
+                    @if (aktuellerSchueler.Foto is not null)
+                    {
+                        <div class="mb-3">
+                            <img src="@aktuellerSchueler.Foto" alt="Foto @aktuellerSchueler.Vorname @aktuellerSchueler.Name" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Texteingabefeld für Kommentar -->
+    <div class="mt-3 mb-3">
+        <input type="text" 
+               class="form-control" 
+               placeholder="Bewertungsgrund" 
+               @bind="kommentarText" 
+               @bind:event="oninput" />
+    </div>
+
+    <!--  Schalter für mündlich/schriftlich über der Button-Reihe -->
+    <div class="d-flex align-items-center justify-content-center mb-2">
+        <span class="me-2">Schriftlich</span>
+        <div class="form-check form-switch">
+            <input class="form-check-input switch-colored" type="checkbox" id="bewertungsArtSwitch" @bind="selectedMuendlich" />
+            <label class="form-check-label" for="bewertungsArtSwitch"></label>
+        </div>
+        <span class="me-2">Mündlich</span>
+    </div>
+
+    <!-- Eingabezeile für Bewertung: 6 quadratische Buttons (1-6) + Skip -->
+    <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+        <div class="btn-group" role="group" aria-label="Notenauswahl">
+            @for (var i = 1; i <= 6; i++)
+            {
+                var note = i; // lokale Kopie, verhindert falsches Capturing des Schleifenwertes
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        style="width:42px;height:42px;padding:0;"
+                        title="Note @note"
+                        disabled="@isAnimating"
+                        @onclick="@(() => AddBewertungAsync(note))">
+                    @note
+                </button>
+            }
+        </div>
+        <button type="button"
+                class="btn btn-warning ms-2"
+                title="Überspringen"
+                disabled="@isAnimating"
+                @onclick="SkipAsync">
+            Skip
+        </button>
+    </div>
+
+    @if (addError is not null)
+    {
+        <div class="text-center">
+            <small class="text-danger">@addError</small>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public string? schuleid { get; set; }
+    [Parameter] public string? klasseid { get; set; }
+
+    private FG_Schule? schule;
+    private FG_Klasse? klasse;
+    private FG_Schueler? aktuellerSchueler;
+    private int aktueller = 0;
+    private bool selectedMuendlich = true;
+    private string? addError;
+    private string kommentarText = "";
+    private bool isAnimating = false;
+    private string animationClass = "slide-in";
+
+    protected override void OnParametersSet()
+    {
+        // Schule anhand der ID suchen
+        schule = FairGrader.Schulen.FirstOrDefault(s => string.Equals(s.Id, schuleid, StringComparison.OrdinalIgnoreCase));
+        
+        // Klasse in der Schule suchen
+        if (schule is not null)
+        {
+            klasse = schule.Klassen.FirstOrDefault(k => string.Equals(k.Id, klasseid, StringComparison.OrdinalIgnoreCase));
+            
+            // Ersten Schüler aus SortList ermitteln
+            SetAktuellerSchueler();
+        }
+    }
+
+    private void SetAktuellerSchueler()
+    {
+        if (klasse is null || aktueller >= klasse.SortList.Count)
+        {
+            aktuellerSchueler = null;
+            return;
+        }
+
+        string aktuelleSchuelerId = klasse.SortList[aktueller];
+        aktuellerSchueler = klasse.Schueler.FirstOrDefault(s => string.Equals(s.Id, aktuelleSchuelerId, StringComparison.OrdinalIgnoreCase));
+        
+        // Setze Animation auf slide-in für neuen Schüler
+        animationClass = "slide-in";
+    }
+
+    private async Task AddBewertungAsync(int note)
+    {
+        addError = null;
+
+        if (aktuellerSchueler is null)
+        {
+            addError = "Schüler nicht gefunden.";
+            return;
+        }
+
+        var ok = aktuellerSchueler.AddBewertung(note, selectedMuendlich, kommentarText);
+        if (!ok)
+        {
+            addError = "Bewertung konnte nicht hinzugefügt werden (Prüfregeln beachten).";
+            return;
+        }
+
+        await FairGrader.SaveSchulenToStorageAsync();
+        
+        // Animation starten
+        await AnimateToNextSchueler();
+    }
+
+    private async Task SkipAsync()
+    {
+        addError = null;
+        
+        // Animation starten
+        await AnimateToNextSchueler();
+    }
+
+    private async Task AnimateToNextSchueler()
+    {
+        // Slide-out Animation starten
+        isAnimating = true;
+        animationClass = "slide-out";
+        StateHasChanged();
+        
+        // Warten bis Animation fertig ist
+        await Task.Delay(300);
+        
+        // Kommentarfeld zurücksetzen
+        kommentarText = "";
+        
+        // Nächsten Schüler laden
+        aktueller++;
+        SetAktuellerSchueler();
+        
+        // Animation beenden
+        isAnimating = false;
+        StateHasChanged();
+        
+        // Kurz warten, dann slide-in Animation
+        await Task.Delay(50);
+        animationClass = "slide-in";
+        StateHasChanged();
+    }
+
+    private void BackToKlasse()
+    {
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}");
+    }
+}

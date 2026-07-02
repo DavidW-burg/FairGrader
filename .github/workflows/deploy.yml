@@ -1,0 +1,40 @@
+name: Deploy Blazor WASM PWA to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: .NET 10 einrichten
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Blazor WebAssembly App veröffentlichen
+        run: dotnet publish FairGraderApp/FairGraderApp.csproj -c Release -o release --nologo
+
+      - name: Base-Href in index.html auf /FairGrader/ setzen
+        run: |
+          sed -i 's|<base href="/" />|<base href="/FairGrader/" />|g' release/wwwroot/index.html
+
+      - name: .nojekyll sicherstellen (damit _framework/_content ausgeliefert werden)
+        run: touch release/wwwroot/.nojekyll
+
+      - name: Deploy auf gh-pages Branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: release/wwwroot
+          publish_branch: gh-pages
+          force_orphan: true

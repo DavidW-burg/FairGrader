@@ -1,0 +1,113 @@
+@page "/schule/{id}"
+@inject FG_FairGrader FairGrader
+@inject NavigationManager NavigationManager
+@using FairGraderApp.Models
+
+<PageTitle>@(schule?.Name ?? "Schule")</PageTitle>
+
+<button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="BackToSchools">
+    <div class="d-flex align-items-center">
+        <div class="me-2 p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+            </svg>
+        </div>
+        Alle Schulen
+    </div>
+</button>
+
+@if (schule is null) {
+    <h1>Schule nicht gefunden</h1>
+    <div class="alert alert-warning">Die angegebene Schule wurde nicht gefunden.</div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0">@schule.Name</h1>
+        <button type="button"
+                class="btn btn-primary d-flex flex-column justify-content-center text-center"
+                style="height:3.5rem; width:7rem;"
+                @onclick="NewClass">
+            <span>Klasse</span>
+            <span>hinzufügen</span>
+        </button>
+    </div>
+
+    @if (schule.Klassen.Count == 0)
+    {
+        <p>Keine Klassen vorhanden.</p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var klasse in schule.Klassen)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    style="cursor: pointer;"
+                    @onclick="@(() => NavigationManager.NavigateTo($"/schule/{id}/klasse/{klasse.Id}"))">
+                    <div class="me-2">
+                        <span class="fw-semibold">@klasse.Name</span>
+                        <small class="text-muted ms-2">@klasse.Fach ,</small>
+                        <small class="text-muted ms-2">@klasse.Schueler.Count Schüler</small>
+                    </div>
+                    <div class="d-flex gap-1">
+                        <button type="button"
+                                class="btn btn-outline-success btn-sm"
+                                title="Klasse bearbeiten"
+                                @onclick:stopPropagation="true"
+                                @onclick="@(() => KlasseBearbeiten(klasse))">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" aria-hidden="true" viewBox="0 0 16 16">
+                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z" />
+                            </svg>
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-danger btn-sm"
+                                title="Klasse löschen"
+                                @onclick:stopPropagation="true"
+                                @onclick="@(() => KlasseLoeschen(klasse))">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h.5v7H6a.5.5 0 0 1-.5-.5v-6zM9.5 5.5a.5.5 0 0 1 .5-.5h.5v7H10a.5.5 0 0 1-.5-.5v-6z"/>
+                                <path d="M14 3h-3.5l-1-1h-3l-1 1H2v1h12V3zM3 5h10l-.7 8.4a2 2 0 0 1-2 1.6H5.7a2 2 0 0 1-2-1.6L3 5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter] public string? id { get; set; }
+
+    private FG_Schule? schule;
+
+    protected override void OnParametersSet()
+    {
+        // Schule aus dem zentralen Modell anhand der ID holen
+        schule = FairGrader.Schulen.FirstOrDefault(s => string.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void NewClass()
+    {
+        // Navigation zu Klasse-Neu
+         NavigationManager.NavigateTo($"/schule/{id}/klasse/neu");
+    }
+
+    private void KlasseBearbeiten(FG_Klasse klasse)
+    {
+        // Navigation zu Klasse bearbeiten
+        NavigationManager.NavigateTo($"/schule/{id}/klasse/bearbeiten/{klasse.Id}");
+    }
+
+    private void KlasseLoeschen(FG_Klasse klasse)
+    {
+        // Navigation zu Klasse löschen
+        NavigationManager.NavigateTo($"/schule/{id}/klasse/loeschen/{klasse.Id}");
+    }
+
+    private void BackToSchools()
+    {
+        NavigationManager.NavigateTo("/schulen");
+    }
+}

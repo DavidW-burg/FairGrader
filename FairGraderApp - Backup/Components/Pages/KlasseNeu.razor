@@ -1,0 +1,105 @@
+@page "/schule/{schuleid}/klasse/neu"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject FG_FairGrader FairGrader
+@inject IJSRuntime JSRuntime
+@using FairGraderApp.Models
+
+<PageTitle>Neue Klasse</PageTitle>
+
+<button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="OnCancel">
+    <div class="d-flex align-items-center">
+        <div class="me-2 p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+            </svg>
+        </div>
+        @(schule?.Name ?? "Zurück")
+    </div>
+</button>
+
+<h1>Neue Klasse</h1>
+
+@if (schule is null)
+{
+    <div class="alert alert-warning">Die angegebene Schule wurde nicht gefunden.</div>
+}
+else
+{
+     <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="klassenname" class="form-label">Klassenname</label>
+            <input id="klassenname" class="form-control" @bind="Klassenname" />
+        </div>
+        <div class="col-md-4">
+            <label for="stufe" class="form-label">Stufe</label>
+            <input id="stufe" type="number" class="form-control" min="1" max="13" @bind="Stufe" />
+        </div>
+        <div class="col-md-4">
+            <label for="zug" class="form-label">Zug</label>
+            <input id="zug" class="form-control" @bind="Zug" maxlength="1" />
+        </div>
+        <div class="mb-3">
+            <label for="fach" class="form-label">Fach</label>
+            <input id="fach" class="form-control" @bind="Fach" />
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" @onclick="OnOk">OK</button>
+    </div>
+    <div class="mb-3">
+        <label class="form-label"><strong>@ErrMsg</strong></label>
+    </div>
+
+}
+
+@code {
+            [Parameter] public string? schuleid { get; set; }
+
+            private FG_Schule? schule;
+            private string Klassenname { get; set; } = string.Empty;
+            private int Stufe { get; set; } = 1;
+            private string Zug { get; set; } = string.Empty;
+            private string Fach { get; set; } = string.Empty;
+            private string ErrMsg = "";
+
+    protected override void OnParametersSet()
+    {
+        // Schule anhand der ID suchen
+        schule = FairGrader.Schulen.FirstOrDefault(s => string.Equals(s.Id, schuleid, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task OnOk()
+    {
+        if (schule is not null)
+            if (!string.IsNullOrWhiteSpace(Zug.Trim()) || !string.IsNullOrWhiteSpace(Fach.Trim())) {
+                var neueKlasse = new FG_Klasse(
+                    Klassenname.Trim(),
+                    Zug.Trim(),
+                    Stufe,
+                    Fach.Trim(),
+                    FG_FairGrader.NewId()
+                );
+                // Klasse zur Schule hinzufügen
+                schule.Klassen.Add(neueKlasse);
+                // Änderungen im Browser-Storage speichern
+                await FairGrader.SaveSchulenToStorageAsync();
+                // Zurück zur Schule
+                NavigationManager.NavigateTo($"/schule/{schuleid}");
+            }
+            else {
+                ErrMsg = "Zug und Fach dürfen nicht leer sein!";
+            }
+        else {
+            ErrMsg = "Datenfehler!";
+        }
+
+    }
+
+    private void OnCancel()
+    {
+        // Zurück zur Schule
+        NavigationManager.NavigateTo($"/schule/{schuleid}");
+    }
+}

@@ -1,0 +1,159 @@
+@page "/schule/{schuleid}/klasse/{klasseid}"
+@rendermode InteractiveServer
+@inject FG_FairGrader FairGrader
+@inject NavigationManager NavigationManager
+@using FairGraderApp.Models
+
+<PageTitle>Klasse</PageTitle>
+
+<button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="BackToSchule">
+    <div class="d-flex align-items-center">
+        <div class="me-2 p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+            </svg>
+        </div>
+        @(schule?.Name ?? "Zurück")
+    </div>
+</button>
+
+@if (klasse is null || schule is null)
+{
+    <h1>Klasse nicht gefunden</h1>
+    <div class="alert alert-warning">Die angegebene Klasse wurde nicht gefunden.</div>
+    <button type="button" class="btn btn-secondary" @onclick="BackToSchools">Zurück zu Schulen</button>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        @if (klasse.Name != "") 
+        { <h1>@klasse.Name - @klasse.Stufe@klasse.Zug</h1> }
+        else 
+        { <h1>@klasse.Stufe@klasse.Zug</h1> }
+        <button type="button"
+                class="btn btn-primary ms-2 d-flex flex-column justify-content-center text-center"
+                style="height:3.5rem; min-width:7rem;"
+                title="Schüler hinzufügen"
+                @onclick="NewStudent">
+            <span>Schüler</span>
+            <span>hinzufügen</span>
+        </button>
+    </div>   
+
+    <div class="mb-3 d-flex align-items-center">
+        <button type="button"
+                class="btn btn-success flex-grow-1 text-start d-flex align-items-center"
+                style="height:4.5rem;"
+                title="FairGrade"
+                @onclick="OnFairGrade">
+            FairGrade
+        </button>
+    </div>
+
+    @if (klasse.Schueler.Count == 0)
+    {
+        <p>Keine Schüler vorhanden.</p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var schueler in klasse.Schueler)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    style="cursor: pointer;"
+                    @onclick="@(() => NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/schueler/{schueler.Id}"))">
+                    
+                    <div class="d-flex align-items-center me-2">
+                        <div>
+                            <span class="fw-semibold">@schueler.Name, @schueler.Vorname</span>
+                            <small class="text-muted ms-2">@GetGeschlechtDisplay(schueler.Geschlecht)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-1">
+                        <button type="button"
+                                class="btn btn-outline-success btn-sm"
+                                title="Schüler bearbeiten"
+                                @onclick:stopPropagation="true"
+                                @onclick="@(() => SchuelerBearbeiten(schueler))">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" aria-hidden="true" viewBox="0 0 16 16">
+                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z" />
+                            </svg>
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-danger btn-sm"
+                                title="Schüler löschen"
+                                @onclick:stopPropagation="true"
+                                @onclick="@(() => SchuelerLoeschen(schueler))">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h.5v7H6a.5.5 0 0 1-.5-.5v-6zM9.5 5.5a.5.5 0 0 1 .5-.5h.5v7H10a.5.5 0 0 1-.5-.5v-6z"/>
+                                <path d="M14 3h-3.5l-1-1h-3l-1 1H2v1h12V3zM3 5h10l-.7 8.4a2 2 0 0 1-2 1.6H5.7a2 2 0 0 1-2-1.6L3 5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter] public string? schuleid { get; set; }
+    [Parameter] public string? klasseid { get; set; }
+
+    private FG_Klasse? klasse;
+    private FG_Schule? schule;
+
+    protected override void OnParametersSet()
+    {
+        // Schule anhand der ID suchen
+        schule = FairGrader.Schulen.FirstOrDefault(s => string.Equals(s.Id, schuleid, StringComparison.OrdinalIgnoreCase));
+        
+        // Klasse in der Schule suchen
+        if (schule is not null)
+        {
+            klasse = schule.Klassen.FirstOrDefault(k => string.Equals(k.Id, klasseid, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    private string GetGeschlechtDisplay(FG_Geschlecht geschlecht)
+    {
+        return geschlecht switch
+        {
+            FG_Geschlecht.not_def => "nA",
+            FG_Geschlecht.male => "männl.",
+            FG_Geschlecht.female => "weibl.",
+            _ => "nA"
+        };
+    }
+
+    private void NewStudent()
+    {
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/schueler/neu");
+    }
+
+    private void SchuelerBearbeiten(FG_Schueler schueler)
+    {
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/schueler/bearbeiten/{schueler.Id}");
+    }
+
+    private void SchuelerLoeschen(FG_Schueler schueler)
+    {
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/schueler/loeschen/{schueler.Id}");
+    }
+
+    private void BackToSchule()
+    {
+        NavigationManager.NavigateTo($"/schule/{schuleid}");
+    }
+
+    private void BackToSchools()
+    {
+        NavigationManager.NavigateTo("/schulen");
+    }
+
+    private void OnFairGrade()
+    {
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/gradefair");
+    }
+}

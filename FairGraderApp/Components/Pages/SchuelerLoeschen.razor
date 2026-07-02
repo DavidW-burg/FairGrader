@@ -1,0 +1,126 @@
+@page "/schule/{schuleid}/klasse/{klasseid}/schueler/loeschen/{schuelerId}"
+@inject FG_FairGrader FairGrader
+@inject NavigationManager NavigationManager
+@using FairGraderApp.Models
+
+<PageTitle>Schüler löschen</PageTitle>
+
+@if (schueler is null || klasse is null || schule is null)
+{
+    <button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="Zurueck">
+        <div class="d-flex align-items-center">
+            <div class="border rounded me-2 p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                </svg>
+            </div>
+            @(klasse?.Name ?? "Zurück")
+        </div>
+    </button>
+
+    <h1>Schüler mit allen Bewertungs- Infos löschen?</h1>
+    <div class="alert alert-warning">Der angegebene Schüler, die Klasse oder Schule wurde nicht gefunden.</div>
+}
+else
+{
+    <button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="Zurueck">
+        <div class="d-flex align-items-center">
+            <div class="border rounded me-2 p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                </svg>
+            </div>
+            Zurück
+        </div>
+    </button>
+
+    <h1>Schüler mit allen Bewertungs- Infos löschen?</h1>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@schueler.Vorname @schueler.Name</h5>
+            <p class="card-text">
+                <strong>Schule:</strong> @schule.Name<br />
+                <strong>Klasse:</strong> @klasse.Name<br />
+                <strong>Geschlecht:</strong> @schueler.Geschlecht<br />
+                <strong>Anzahl Bewertungen:</strong> @schueler.Bewertungen.Count
+            </p>
+            
+            @if (schueler.Foto is not null)
+            {
+                <div class="mt-3 mb-3">
+                    <strong>Foto:</strong><br />
+                    <img src="@schueler.Foto" alt="Schüler Foto" class="img-thumbnail mt-1" style="max-width: 100px; max-height: 100px;" />
+                </div>
+            }
+            
+            @if (schueler.Bewertungen.Count > 0)
+            {
+                <div class="mt-3">
+                    <strong>Bewertungen:</strong>
+                    <ul class="list-unstyled mt-2">
+                        @foreach (var bewertung in schueler.Bewertungen.Take(5))
+                        {
+                            <li class="text-muted">• Note @bewertung.Note (@(bewertung.Muendlich ? "mündlich" : "schriftlich")) - @bewertung.DateTime.ToString("dd.MM.yyyy")</li>
+                        }
+                        @if (schueler.Bewertungen.Count > 5)
+                        {
+                            <li class="text-muted">• ... und @(schueler.Bewertungen.Count - 5) weitere</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-danger" @onclick="JetztLoeschen">Jetzt löschen</button>
+    </div>
+}
+
+@code {
+    [Parameter] public string? schuleid { get; set; }
+    [Parameter] public string? klasseid { get; set; }
+    [Parameter] public string? schuelerId { get; set; }
+
+    private FG_Schule? schule;
+    private FG_Klasse? klasse;
+    private FG_Schueler? schueler;
+
+    protected override void OnParametersSet()
+    {
+        // Schule anhand der ID suchen
+        schule = FairGrader.Schulen.FirstOrDefault(s => string.Equals(s.Id, schuleid, StringComparison.OrdinalIgnoreCase));
+        
+        // Klasse in der Schule suchen
+        if (schule is not null)
+        {
+            klasse = schule.Klassen.FirstOrDefault(k => string.Equals(k.Id, klasseid, StringComparison.OrdinalIgnoreCase));
+            
+            // Schüler in der Klasse suchen
+            if (klasse is not null)
+            {
+                schueler = klasse.Schueler.FirstOrDefault(s => string.Equals(s.Id, schuelerId, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+    }
+
+    private async Task JetztLoeschen()
+    {
+        if (schueler is not null && klasse is not null && schule is not null && 
+            schuleid is not null && klasseid is not null && schuelerId is not null)
+        {
+            // Schüler aus der Klasse entfernen
+            await FairGrader.DeleteSchuelerAsync(schuleid, klasseid, schuelerId);
+        }
+
+        // Zurück zur Klasse
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}");
+    }
+
+    private void Zurueck()
+    {
+        // Zurück zur Klasse
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}");
+    }
+}

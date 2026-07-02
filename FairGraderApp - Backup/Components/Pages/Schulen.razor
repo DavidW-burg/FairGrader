@@ -1,0 +1,85 @@
+@page "/schulen"
+@rendermode InteractiveServer
+@inject FG_FairGrader FairGrader
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@using FairGraderApp.Models
+
+<PageTitle>Schulen</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Schulen</h1>
+    <button type="button" 
+            class="btn btn-primary d-flex flex-column justify-content-center text-center"
+            style="height:4.5rem; width:7rem;"
+            @onclick="@(() => NavigationManager.NavigateTo("/schulen/neu"))">
+        <span>Schule</span>
+        <span>hinzufügen</span>
+    </button>
+</div>
+
+@if (schulen is null) {
+    <p>Lade Daten...</p>
+}
+else if (schulen.Count == 0) {
+    <p>Keine Schulen vorhanden.</p>
+}
+else {
+    <ul class="list-group">
+        @foreach (var s in schulen) {
+            <li class="list-group-item d-flex justify-content-between align-items-center" 
+                style="cursor: pointer;"
+                @onclick="@(() => NavigationManager.NavigateTo($"/schule/{s.Id}"))">
+                <div class="me-2">
+                    <span class="fw-semibold">@s.Name</span>
+                    <small class="text-muted ms-2">@s.Adresse.Replace("\n", " | ")</small>
+                    <small class="text-muted ms-2"> | @s.Klassen.Count Klassen</small>
+                </div>
+                <div class="d-flex gap-1">
+                    <button type="button"
+                            class="btn btn-outline-success btn-sm"
+                            title="Bearbeiten"
+                            @onclick:stopPropagation="true"
+                            @onclick="@(() => NavigationManager.NavigateTo($"/schulen/bearbeiten/{s.Id}"))">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" aria-hidden="true" viewBox="0 0 16 16">
+                            <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001z" />
+                        </svg>
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-danger btn-sm"
+                            title="Löschen"
+                            @onclick:stopPropagation="true"
+                            @onclick="@(() => NavigationManager.NavigateTo($"/schulen/loeschen/{Uri.EscapeDataString(s.Id)}"))">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h.5v7H6a.5.5 0 0 1-.5-.5v-6zM9.5 5.5a.5.5 0 0 1 .5-.5h.5v7H10a.5.5 0 0 1-.5-.5v-6z"/>
+                            <path d="M14 3h-3.5l-1-1h-3l-1 1H2v1h12V3zM3 5h10l-.7 8.4a2 2 0 0 1-2 1.6H5.7a2 2 0 0 1-2-1.6L3 5z"/>
+                        </svg>
+                    </button>
+                </div>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<FG_Schule>? schulen;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await FairGrader.EnsureLoadedFromBrowserStorageAsync(JSRuntime);
+            schulen = FairGrader.GetSchulenSortiert();
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteSchule(FG_Schule schule)
+    {
+        if (await FairGrader.DeleteSchuleAsync(schule))
+        {
+            schulen = FairGrader.GetSchulenSortiert();
+            StateHasChanged();
+        }
+    }
+}

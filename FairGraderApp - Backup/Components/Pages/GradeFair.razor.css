@@ -1,0 +1,59 @@
+/* Gelb wenn false (aus), Blau wenn true (an) */
+.switch-colored {
+    background-color: #ffc107; /* Bootstrap Warning */
+    border-color: #ffc107;
+}
+
+.switch-colored:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* blaues Focus-Shadow */
+}
+
+.switch-colored:checked {
+    background-color: #0d6efd; /* Bootstrap Primary */
+    border-color: #0d6efd;
+}
+
+/* Animation Styles */
+.schueler-container {
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+.schueler-card {
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.slide-in-right {
+    transform: translateX(0);
+    opacity: 1;
+    animation: slideInFromRight 0.5s ease-out;
+}
+
+.slide-out-left {
+    transform: translateX(-100%);
+    opacity: 0;
+    animation: slideOutToLeft 0.5s ease-in;
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutToLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}

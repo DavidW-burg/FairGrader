@@ -1,0 +1,68 @@
+@page "/schulen/loeschen/{id}"
+@inject FG_FairGrader FairGrader
+@inject NavigationManager NavigationManager
+@using FairGraderApp.Models
+
+<PageTitle>Schule löschen</PageTitle>
+
+<button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="OnCancel">
+    <div class="d-flex align-items-center">
+        <div class="me-2 p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+            </svg>
+        </div>
+        Schulen
+    </div>
+</button>
+
+<h1>Schule mit allen Klassen- Infos löschen?</h1>
+
+@if (schule is null)
+{
+    <div class="alert alert-warning">Die angegebene Schule wurde nicht gefunden.</div>
+}
+else
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@schule.Name</h5>
+            <p class="card-text">
+                <strong>Adresse:</strong><br />
+                @schule.Adresse
+            </p>
+            @* Hier könnten Klassen/Infos angezeigt werden, falls im Modell vorhanden *@
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-danger" @onclick="JetztLoeschen">Jetzt löschen</button>
+    </div>
+}
+
+@code {
+    [Parameter] public string? id { get; set; }
+
+    private FG_Schule? schule;
+
+    protected override void OnParametersSet()
+    {
+        // Schule aus dem zentralen Modell anhand des Namens holen
+        schule = FairGrader.Schulen.FirstOrDefault(s => string.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private async Task JetztLoeschen()
+    {
+        if (schule is not null)
+        {
+            await FairGrader.DeleteSchuleAsync(schule);
+        }
+
+        NavigationManager.NavigateTo("/schulen");
+    }
+
+    private void OnCancel()
+    {
+        NavigationManager.NavigateTo("/schulen");
+    }
+}

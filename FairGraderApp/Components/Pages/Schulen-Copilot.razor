@@ -1,0 +1,312 @@
+﻿@page "/schulen"
+@inject FG_FairGrader FairGrader
+@inject IJSRuntime JSRuntime
+@using FairGraderApp.Models
+
+<PageTitle>Schulverwaltung</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="bi bi-building"></i> Schulverwaltung
+            </h1>
+        </div>
+    </div>
+
+    @if (isLoading) {
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Lade Daten...</span>
+                </div>
+                <p class="mt-2">Lade Schuldaten...</p>
+            </div>
+        </div>
+    }
+    else {
+        <!-- Neue Schule hinzufügen -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-plus-circle"></i> Neue Schule hinzufügen
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label for="neuerSchuleName" class="form-label">Schulname</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="neuerSchuleName"
+                                       @bind="neuerSchuleName"
+                                       placeholder="z.B. Gymnasium Musterstadt" />
+                            </div>
+                            <div class="col-md-5">
+                                <label for="neueSchuleAdresse" class="form-label">Adresse</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="neueSchuleAdresse"
+                                       @bind="neueSchuleAdresse"
+                                       placeholder="z.B. Schulstraße 1, 12345 Musterstadt" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-primary w-100"
+                                        @onclick="AddSchule"
+                                        disabled="@(string.IsNullOrWhiteSpace(neuerSchuleName) || string.IsNullOrWhiteSpace(neueSchuleAdresse))">
+                                    <i class="bi bi-plus"></i> Hinzufügen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schulliste -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list"></i> Schulen (@schulen.Count)
+                        </h5>
+                        <button class="btn btn-outline-secondary btn-sm" @onclick="RefreshData">
+                            <i class="bi bi-arrow-clockwise"></i> Aktualisieren
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        @if (schulen.Count == 0) {
+                            <div class="text-center py-5">
+                                <i class="bi bi-building" style="font-size: 3rem; color: #6c757d;"></i>
+                                <p class="text-muted mt-3">Noch keine Schulen vorhanden.</p>
+                                <p class="text-muted">Fügen Sie die erste Schule über das Formular oben hinzu.</p>
+                            </div>
+                        }
+                        else {
+                            <div class="row">
+                                @foreach (var schule in schulen) {
+                                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-3">
+                                        <div class="card h-100 @(editSchule == schule ? "border-primary" : "")">
+                                            <div class="card-body">
+                                                @if (editSchule == schule) {
+                                                    <!-- Bearbeitungsmodus -->
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Schulname</label>
+                                                        <input type="text"
+                                                               class="form-control"
+                                                               @bind="editSchuleName" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Adresse</label>
+                                                        <textarea class="form-control"
+                                                                  rows="2"
+                                                                  @bind="editSchuleAdresse"></textarea>
+                                                    </div>
+                                                    <div class="d-flex gap-2">
+                                                        <button class="btn btn-success btn-sm"
+                                                                @onclick="SaveEdit"
+                                                                disabled="@(string.IsNullOrWhiteSpace(editSchuleName) || string.IsNullOrWhiteSpace(editSchuleAdresse))">
+                                                            <i class="bi bi-check"></i> Speichern
+                                                        </button>
+                                                        <button class="btn btn-secondary btn-sm"
+                                                                @onclick="CancelEdit">
+                                                            <i class="bi bi-x"></i> Abbrechen
+                                                        </button>
+                                                    </div>
+                                                }
+                                                else {
+                                                    <!-- Anzeigemodus -->
+                                                    <h5 class="card-title text-primary mb-3">
+                                                        <i class="bi bi-building-fill"></i>
+                                                        @schule.Name
+                                                    </h5>
+                                                    <p class="card-text">
+                                                        <i class="bi bi-geo-alt"></i>
+                                                        <small class="text-muted">@schule.Adresse</small>
+                                                    </p>
+
+                                                    <div class="mt-3">
+                                                        <small class="text-muted">
+                                                            <i class="bi bi-diagram-3"></i>
+                                                            @schule.Klassen.Count Klassen
+                                                        </small>
+                                                    </div>
+
+                                                    <div class="d-flex gap-2 mt-3">
+                                                        <button class="btn btn-outline-primary btn-sm"
+                                                                @onclick="() => StartEdit(schule)">
+                                                            <i class="bi bi-pencil"></i> Bearbeiten
+                                                        </button>
+                                                        <button class="btn btn-outline-danger btn-sm"
+                                                                @onclick="() => DeleteSchule(schule)"
+                                                                @onclick:preventDefault="true"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#deleteModal">
+                                                            <i class="bi bi-trash"></i> Löschen
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Lösch-Bestätigungsmodal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                    Schule löschen
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if (schuleToDelete != null) {
+                    <p>Möchten Sie die Schule <strong>"@schuleToDelete.Name"</strong> wirklich löschen?</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Achtung:</strong> Alle zugehörigen Klassen und Schülerdaten werden ebenfalls gelöscht!
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Abbrechen
+                </button>
+                <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" data-bs-dismiss="modal">
+                    <i class="bi bi-trash"></i> Löschen
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<FG_Schule> schulen = new();
+    private bool isLoading = true;
+
+    // Neue Schule hinzufügen
+    private string neuerSchuleName = string.Empty;
+    private string neueSchuleAdresse = string.Empty;
+
+    // Bearbeitung
+    private FG_Schule? editSchule = null;
+    private string editSchuleName = string.Empty;
+    private string editSchuleAdresse = string.Empty;
+
+    // Löschung
+    private FG_Schule? schuleToDelete = null;
+
+    protected override async Task OnInitializedAsync() {
+        await LoadData();
+    }
+
+    private async Task LoadData() {
+        isLoading = true;
+        StateHasChanged();
+
+        // Kurze Verzögerung für localStorage-Zugriff
+        await Task.Delay(100);
+
+        schulen = FairGrader.GetSchulenSortiert();
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task AddSchule() {
+        if (string.IsNullOrWhiteSpace(neuerSchuleName) || string.IsNullOrWhiteSpace(neueSchuleAdresse))
+            return;
+
+        var neueSchule = new FG_Schule {
+            Name = neuerSchuleName.Trim(),
+            Adresse = neueSchuleAdresse.Trim()
+        };
+
+        bool erfolg = await FairGrader.AddSchuleAsync(neueSchule);
+        if (erfolg) {
+            // Formular zurücksetzen
+            neuerSchuleName = string.Empty;
+            neueSchuleAdresse = string.Empty;
+
+            // Daten aktualisieren
+            await RefreshData();
+        }
+    }
+
+    private void StartEdit(FG_Schule schule) {
+        editSchule = schule;
+        editSchuleName = schule.Name;
+        editSchuleAdresse = schule.Adresse;
+    }
+
+    private void CancelEdit() {
+        editSchule = null;
+        editSchuleName = string.Empty;
+        editSchuleAdresse = string.Empty;
+    }
+
+    private async Task SaveEdit() {
+        if (editSchule == null || string.IsNullOrWhiteSpace(editSchuleName) || string.IsNullOrWhiteSpace(editSchuleAdresse))
+            return;
+
+        bool erfolg = await FairGrader.UpdateSchuleAsync(editSchule, editSchuleName.Trim(), editSchuleAdresse.Trim());
+        if (erfolg) {
+            CancelEdit();
+            await RefreshData();
+        }
+    }
+
+    private void DeleteSchule(FG_Schule schule) {
+        schuleToDelete = schule;
+    }
+
+    private async Task ConfirmDelete() {
+        if (schuleToDelete == null)
+            return;
+
+        bool erfolg = await FairGrader.DeleteSchuleAsync(schuleToDelete);
+        if (erfolg) {
+            schuleToDelete = null;
+            await RefreshData();
+        }
+    }
+
+    private async Task RefreshData() {
+        await LoadData();
+    }
+}
+
+<style>
+    .card {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .border-primary {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+</style>

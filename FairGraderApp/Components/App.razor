@@ -1,0 +1,12 @@
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(FairGraderApp.Components.Layout.MainLayout)" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Nicht gefunden</PageTitle>
+        <LayoutView Layout="typeof(FairGraderApp.Components.Layout.MainLayout)">
+            <p role="alert">Sorry, die Seite existiert nicht.</p>
+        </LayoutView>
+    </NotFound>
+</Router>

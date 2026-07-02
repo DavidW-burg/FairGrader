@@ -1,0 +1,242 @@
+@page "/schule/{schuleid}/klasse/{klasseid}/schueler/{schuelerid}"
+@rendermode InteractiveServer
+@inject FG_FairGrader FairGrader
+@inject NavigationManager NavigationManager
+@using FairGraderApp.Models
+
+<PageTitle>Schüler</PageTitle>
+
+<button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="BackToKlasse">
+    <div class="d-flex align-items-center">
+        <div class="me-2 p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+            </svg>
+        </div>
+        @(klasse?.Name ?? "Zurück")
+    </div>
+</button>
+
+@if (schule is null || klasse is null || schueler is null)
+{
+    <h1>Schüler nicht gefunden</h1>
+    <div class="alert alert-warning">Die angegebenen Daten konnten nicht geladen werden.</div>
+}
+else
+{
+    <h1>@schueler.Vorname @schueler.Name</h1>
+    <div class="text-muted mb-3">
+        @if (klasse.Name != "")
+        {
+            <span class="me-2">Klasse: @klasse.Name (@klasse.Stufe@klasse.Zug)</span>
+        }
+        else
+        {
+            <span class="me-2">Klasse: @klasse.Stufe@klasse.Zug</span>
+        }        
+    </div>
+
+    @if (schueler.Foto is not null)
+    {
+        <div class="mb-3">
+            <img src="@schueler.Foto" alt="Foto @schueler.Vorname @schueler.Name" class="img-thumbnail" style="max-width: 160px; max-height: 160px;" />
+        </div>
+    }
+
+    <!--  Schalter für mündlich/schriftlich über der Button-Reihe -->
+    <div class="d-flex align-items-center mb-2">
+        <span class="me-2">Schriftlich</span>
+        <div class="form-check form-switch">
+            <input class="form-check-input switch-colored" type="checkbox" id="bewertungsArtSwitch" @bind="selectedMuendlich" />
+            <label class="form-check-label" for="bewertungsArtSwitch"></label>
+        </div>
+        <span class="me-2">Mündlich</span>
+    </div>
+
+    <style>
+        /* Gelb wenn false (aus), Blau wenn true (an) */
+        .switch-colored {
+            background-color: #ffc107; /* Bootstrap Warning */
+            border-color: #ffc107;
+        }
+        .switch-colored:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* blaues Focus-Shadow */
+        }
+        .switch-colored:checked {
+            background-color: #0d6efd; /* Bootstrap Primary */
+            border-color: #0d6efd;
+        }
+    </style>
+
+    <!-- Neue Eingabezeile für Bewertung: 6 quadratische Buttons (1-6) + Hinzufügen -->
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="btn-group" role="group" aria-label="Notenauswahl">
+            @for (var i = 1; i <= 6; i++)
+            {
+                var note = i; // lokale Kopie, verhindert falsches Capturing des Schleifenwertes
+                <button type="button"
+                        class="btn @(selectedNote == note ? "btn-secondary" : "btn-outline-secondary")"
+                        style="width:42px;height:42px;padding:0;"
+                        title="Note @note"
+                        @onclick="@(() => SelectNote(note))">
+                    @note
+                </button>
+            }
+        </div>
+        <button type="button"
+                class="btn btn-primary"
+                title="Bewertung hinzufügen"
+                @onclick="AddBewertungAsync">
+            +
+        </button>
+        @if (addError is not null)
+        {
+            <small class="text-danger ms-2">@addError</small>
+        }
+        @if (addInfo is not null)
+        {
+            <span class="ms-2" title="Erfolgreich hinzugefügt">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" aria-hidden="true" viewBox="0 0 16 16" fill="green">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"/>
+                    <path fill="#fff" d="M11.03 5.97a.75.75 0 0 1 0 1.06L7.56 10.5a.75.75 0 0 1-1.06 0L4.97 8.97a.75.75 0 0 1 1.06-1.06L7 8.88l2.97-2.91a.75.75 0 0 1 1.06 0z"/>
+                </svg>
+            </span>
+        }
+    </div>
+
+    @if (schueler.Bewertungen.Count == 0)
+    {
+        <p>Keine Bewertungen vorhanden.</p>
+    }
+    else
+    {
+        <h5>Bewertungen</h5>
+        <small class="text-muted">(mdl: @DurchschnittMuendlich.ToString("F2") / schrftl: @DurchschnittSchriftlich.ToString("F2"))</small>
+        <ul class="list-group">
+            @foreach (var b in schueler.Bewertungen.OrderByDescending(x => x.DateTime))
+            {
+                var bg = b.Muendlich ? "#ABCCFE" : "#FFEAAA";
+                <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color:@bg;">
+                    <div>
+                        <span class="fw-semibold">Note: @b.Note</span>
+                        <small class="text-muted ms-2">@(b.Muendlich ? "mündlich" : "schriftlich")</small>
+                        <small class="text-muted ms-2">@b.DateTime.ToString("dd.MM.yyyy")</small>
+                        @if (!string.IsNullOrWhiteSpace(b.Kommentar))
+                        {
+                            <small class="text-muted ms-2">„@b.Kommentar”</small>
+                        }
+                    </div>
+                    <div class="d-flex gap-1">
+                        <button type="button"
+                                class="btn btn-outline-danger btn-sm"
+                                title="Bewertung löschen"
+                                @onclick:stopPropagation="true"
+                                @onclick="@(() => DeleteBewertung(b))">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h.5v7H6a.5.5 0 0 1-.5-.5v-6zM9.5 5.5a.5.5 0 0 1 .5-.5h.5v7H10a.5.5 0 0 1-.5-.5v-6z"/>
+                                <path d="M14 3h-3.5l-1-1h-3l-1 1H2v1h12V3zM3 5h10l-.7 8.4a2 2 0 0 1-2 1.6H5.7a2 2 0 0 1-2-1.6L3 5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter] public string? schuleid { get; set; }
+    [Parameter] public string? klasseid { get; set; }
+    [Parameter] public string? schuelerid { get; set; }
+
+    private FG_Schule? schule;
+    private FG_Klasse? klasse;
+    private FG_Schueler? schueler;
+
+    private int selectedNote;
+    private bool selectedMuendlich = true;
+    private string? addError;
+    private string? addInfo;
+
+    private double DurchschnittMuendlich;
+    private double DurchschnittSchriftlich;
+
+    protected override void OnParametersSet()
+    {
+        schule = FairGrader.Schulen.FirstOrDefault(s => string.Equals(s.Id, schuleid, StringComparison.OrdinalIgnoreCase));
+        if (schule is not null)
+        {
+            klasse = schule.Klassen.FirstOrDefault(k => string.Equals(k.Id, klasseid, StringComparison.OrdinalIgnoreCase));
+            if (klasse is not null)
+            {
+                schueler = klasse.Schueler.FirstOrDefault(x => string.Equals(x.Id, schuelerid, StringComparison.OrdinalIgnoreCase));
+                UpdateDurchschnitte();
+            }
+        }
+    }
+
+    private void SelectNote(int note)
+    {
+        selectedNote = note;
+        addError = null;
+        addInfo = null;
+    }
+
+    private async Task AddBewertungAsync()
+    {
+        addError = null;
+        addInfo = null;
+
+        if (schueler is null)
+        {
+            addError = "Schüler nicht gefunden.";
+            return;
+        }
+
+        if (selectedNote is < 1 or > 6)
+        {
+            addError = "Bitte zuerst eine Note (1–6) wählen.";
+            return;
+        }
+
+        var ok = schueler.AddBewertung(selectedNote, selectedMuendlich, "");
+        if (!ok)
+        {
+            addError = "Bewertung konnte nicht hinzugefügt werden (Prüfregeln beachten).";
+            return;
+        }
+
+        await FairGrader.SaveSchulenToStorageAsync();
+        addInfo = "ok";
+        selectedNote = 0;
+
+        UpdateDurchschnitte();
+        StateHasChanged();
+    }
+
+    private void UpdateDurchschnitte()
+    {
+        if (schueler is null) { DurchschnittMuendlich = 0; DurchschnittSchriftlich = 0; return; }
+        var mu = schueler.GetMuendlicheBewertungen();
+        var sc = schueler.GetSchriftlicheBewertungen();
+        DurchschnittMuendlich = mu.Durchschnitt;
+        DurchschnittSchriftlich = sc.Durchschnitt;
+    }
+
+    private void BackToKlasse()
+    {
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}");
+    }
+
+    private async Task DeleteBewertung(FG_Bewertung bewertung)
+    {
+        if (schueler is null) return;
+
+        if (schueler.DeleteBewertung(bewertung))
+        {
+            await FairGrader.SaveSchulenToStorageAsync();
+            UpdateDurchschnitte();
+            StateHasChanged();
+        }
+    }
+}

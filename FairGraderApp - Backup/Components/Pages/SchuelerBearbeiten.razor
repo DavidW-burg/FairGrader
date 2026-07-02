@@ -1,0 +1,173 @@
+@page "/schule/{schuleid}/klasse/{klasseid}/schueler/bearbeiten/{schuelerId}"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject FG_FairGrader FairGrader
+@inject IJSRuntime JSRuntime
+@using FairGraderApp.Models
+
+<PageTitle>Schüler bearbeiten</PageTitle>
+
+@if (schule is null || klasse is null || schueler is null)
+{
+    <button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="OnCancel">
+        <div class="d-flex align-items-center">
+            <div class="border rounded me-2 p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                </svg>
+            </div>
+            @(klasse?.Name ?? "Zurück")
+        </div>
+    </button>
+
+    <h1>Schüler bearbeiten</h1>
+    <div class="alert alert-warning">Der angegebene Schüler, die Klasse oder Schule wurde nicht gefunden.</div>
+}
+else
+{
+    <button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="OnCancel">
+        <div class="d-flex align-items-center">
+            <div class="border rounded me-2 p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                </svg>
+            </div>
+            Zurück
+        </div>
+    </button>
+
+    <h1>Schüler bearbeiten</h1>
+
+    <div class="mb-3">
+        <label class="form-label">Klasse: <strong>@klasse.Name</strong> (@schule.Name)</label>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="name" class="form-label">Nachname</label>
+            <input id="name" class="form-control" @bind="Name" />
+        </div>
+        <div class="col-md-6">
+            <label for="vorname" class="form-label">Vorname</label>
+            <input id="vorname" class="form-control" @bind="Vorname" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="geschlecht" class="form-label">Geschlecht</label>
+        <select id="geschlecht" class="form-select" @bind="Geschlecht">
+            <option value="@FG_Geschlecht.not_def">Nicht definiert</option>
+            <option value="@FG_Geschlecht.male">Männlich</option>
+            <option value="@FG_Geschlecht.female">Weiblich</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="foto" class="form-label">Foto (optional)</label>
+        <div class="border rounded p-3 text-center bg-light">
+            @if (!string.IsNullOrEmpty(FotoUrl))
+            {
+                <div class="mb-2">
+                    <img src="@FotoUrl" alt="Schüler Foto" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                </div>
+            }
+            <input type="url" id="foto" class="form-control" placeholder="Foto-URL eingeben..." @bind="FotoUrl" />
+            <small class="form-text text-muted">URL zu einem Foto eingeben (z.B. https://example.com/foto.jpg)</small>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary" @onclick="OnOk">Speichern</button>
+    </div>
+}
+
+@code {
+    [Parameter] public string? schuleid { get; set; }
+    [Parameter] public string? klasseid { get; set; }
+    [Parameter] public string? schuelerId { get; set; }
+
+    private FG_Schule? schule;
+    private FG_Klasse? klasse;
+    private FG_Schueler? schueler;
+    private string Name { get; set; } = string.Empty;
+    private string Vorname { get; set; } = string.Empty;
+    private FG_Geschlecht Geschlecht { get; set; } = FG_Geschlecht.not_def;
+    private string FotoUrl { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        // Schule anhand der ID suchen
+        schule = FairGrader.Schulen.FirstOrDefault(s => string.Equals(s.Id, schuleid, StringComparison.OrdinalIgnoreCase));
+
+        // Klasse in der Schule suchen
+        if (schule is not null)
+        {
+            klasse = schule.Klassen.FirstOrDefault(k => string.Equals(k.Id, klasseid, StringComparison.OrdinalIgnoreCase));
+
+            // Schüler in der Klasse suchen
+            if (klasse is not null)
+            {
+                schueler = klasse.Schueler.FirstOrDefault(s => string.Equals(s.Id, schuelerId, StringComparison.OrdinalIgnoreCase));
+
+                // Vorhandene Werte in die Eingabefelder laden
+                if (schueler is not null)
+                {
+                    Name = schueler.Name;
+                    Vorname = schueler.Vorname;
+                    Geschlecht = (FG_Geschlecht)schueler.Geschlecht;
+                    FotoUrl = schueler.Foto?.ToString() ?? string.Empty;
+                }
+            }
+        }
+    }
+
+    private async Task OnOk()
+    {
+        if (schule is not null && klasse is not null && schueler is not null && 
+            !string.IsNullOrWhiteSpace(Name.Trim()) && !string.IsNullOrWhiteSpace(Vorname.Trim()))
+        {
+            // Null-Check für alle IDs, um CS8604 zu vermeiden
+            if (schuleid is not null && klasseid is not null && schuelerId is not null)
+            {
+                // Foto-URL validieren
+                Uri? fotoUri = null;
+                if (!string.IsNullOrWhiteSpace(FotoUrl.Trim()))
+                {
+                    if (Uri.TryCreate(FotoUrl.Trim(), UriKind.Absolute, out fotoUri))
+                    {
+                        // URI ist gültig
+                        schueler.Foto = fotoUri;
+                    }
+                    else
+                    {
+                        schueler.Foto = null; // Ungültige URI wird entfernt
+                    }
+                }
+                else
+                {
+                    schueler.Foto = null; // Leere URL entfernt Foto
+                }
+
+                await FairGrader.UpdateSchuelerAsync(schuleid, 
+                                                   klasseid, 
+                                                   schuelerId,
+                                                   Name.Trim(), 
+                                                   Vorname.Trim(), 
+                                                   Geschlecht);
+
+                // Zurück zur Klasse
+                NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Fehler: Schule, Klasse oder Schüler nicht gefunden.");
+            }
+        }
+    }
+
+    private void OnCancel()
+    {
+        // Zurück zur Klasse
+        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}");
+    }
+}

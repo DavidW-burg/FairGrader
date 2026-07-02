@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36811.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FairGraderApp", "FairGraderApp\FairGraderApp.csproj", "{C46F18FD-099C-4938-BE81-55C104CF918D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C46F18FD-099C-4938-BE81-55C104CF918D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C46F18FD-099C-4938-BE81-55C104CF918D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C46F18FD-099C-4938-BE81-55C104CF918D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C46F18FD-099C-4938-BE81-55C104CF918D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D8649EA5-7E9C-41BB-9890-E2A7018D0A23}
+	EndGlobalSection
+EndGlobal

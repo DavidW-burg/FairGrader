@@ -1,0 +1,88 @@
+/* Fügen Sie diese CSS-Regeln zu Ihrer site.css hinzu */
+
+.schueler-container {
+    position: relative;
+    height: 300px; /* Feste Höhe um Layout-Sprünge zu vermeiden */
+    overflow: hidden;
+}
+
+.schueler-card {
+    position: absolute;
+    width: 100%;
+    transition: transform 0.5s ease-in-out;
+}
+
+.slide-in-right {
+    transform: translateX(0);
+    animation: slideInRight 0.5s ease-in-out;
+}
+
+.slide-out-left {
+    transform: translateX(-100%);
+    animation: slideOutLeft 0.5s ease-in-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+/* Switch-Styling falls gewünscht */
+.switch-colored:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Drag & Drop Styling für Schülerliste */
+.sortable-item {
+    transition: background-color 0.2s ease;
+}
+
+.sortable-item:hover {
+    background-color: #f8f9fa;
+}
+
+.sortable-item[draggable="true"] {
+    user-select: none;
+}
+
+.sortable-item.dragging {
+    opacity: 0.5;
+    background-color: #e9ecef;
+}
+
+.drag-handle {
+    color: #6c757d;
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Verbessertes Drag-Over Feedback */
+.sortable-list .list-group-item {
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.sortable-list .list-group-item:hover {
+    border-bottom-color: #007bff;
+}
