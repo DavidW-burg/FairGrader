@@ -44,7 +44,7 @@ else
             {
                 <li class="list-group-item d-flex justify-content-between align-items-center"
                     style="cursor: pointer;"
-                    @onclick="@(() => NavigationManager.NavigateTo($"/schule/{id}/klasse/{klasse.Id}"))">
+                    @onclick="@(() => NavigationManager.NavigateTo($"schule/{id}/klasse/{klasse.Id}"))">
                     <div class="me-2">
                         <span class="fw-semibold">@klasse.Name</span>
                         <small class="text-muted ms-2">@klasse.Fach ,</small>
@@ -91,23 +91,23 @@ else
     private void NewClass()
     {
         // Navigation zu Klasse-Neu
-         NavigationManager.NavigateTo($"/schule/{id}/klasse/neu");
+         NavigationManager.NavigateTo($"schule/{id}/klasse/neu");
     }
 
     private void KlasseBearbeiten(FG_Klasse klasse)
     {
         // Navigation zu Klasse bearbeiten
-        NavigationManager.NavigateTo($"/schule/{id}/klasse/bearbeiten/{klasse.Id}");
+        NavigationManager.NavigateTo($"schule/{id}/klasse/bearbeiten/{klasse.Id}");
     }
 
     private void KlasseLoeschen(FG_Klasse klasse)
     {
         // Navigation zu Klasse löschen
-        NavigationManager.NavigateTo($"/schule/{id}/klasse/loeschen/{klasse.Id}");
+        NavigationManager.NavigateTo($"schule/{id}/klasse/loeschen/{klasse.Id}");
     }
 
     private void BackToSchools()
     {
-        NavigationManager.NavigateTo("/schulen");
+        NavigationManager.NavigateTo("schulen");
     }
 }

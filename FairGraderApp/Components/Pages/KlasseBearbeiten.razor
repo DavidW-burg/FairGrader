@@ -99,7 +99,7 @@ else
                                                    Stufe, 
                                                    Fach.Trim());
                 // Zurück zur Schule
-                NavigationManager.NavigateTo($"/schule/{schuleid}");
+                NavigationManager.NavigateTo($"schule/{schuleid}");
             }
             else {
                 await JSRuntime.InvokeVoidAsync("alert", "Fehler: Schule oder Klasse nicht gefunden.");
@@ -111,6 +111,6 @@ else
     private void OnCancel()
     {
         // Zurück zur Schule
-        NavigationManager.NavigateTo($"/schule/{schuleid}");
+        NavigationManager.NavigateTo($"schule/{schuleid}");
     }
 }

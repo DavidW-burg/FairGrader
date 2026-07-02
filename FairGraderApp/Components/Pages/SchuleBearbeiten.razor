@@ -66,11 +66,11 @@ else
             await FairGrader.UpdateSchuleAsync(schule, Schulname.Trim(), Adresse.Trim());
         }
 
-        NavigationManager.NavigateTo("/schulen");
+        NavigationManager.NavigateTo("schulen");
     }
 
     private void OnCancel()
     {
-        NavigationManager.NavigateTo("/schulen");
+        NavigationManager.NavigateTo("schulen");
     }
 }

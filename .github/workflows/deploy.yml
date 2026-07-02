@@ -28,6 +28,9 @@ jobs:
         run: |
           sed -i 's|<base href="/" />|<base href="/FairGrader/" />|g' release/wwwroot/index.html
 
+      - name: 404.html als Kopie der index.html erstellen (SPA-Fallback)
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
+
       - name: .nojekyll sicherstellen (damit _framework/_content ausgeliefert werden)
         run: touch release/wwwroot/.nojekyll
 

@@ -39,16 +39,12 @@
     private async Task OnOk()
     {
         var neueSchule = new FG_Schule(Schulname.Trim(), Adresse.Trim(), FG_FairGrader.NewId());
-
-        // Über das zentrale Modell hinzufügen (persistiert ggf. in Storage)
         await FairGrader.AddSchuleAsync(neueSchule);
-
-        // Zurück zur Schulen-Seite
-        NavigationManager.NavigateTo("/schulen");
+        NavigationManager.NavigateTo("schulen");
     }
 
     private void OnCancel()
     {
-        NavigationManager.NavigateTo("/schulen");
+        NavigationManager.NavigateTo("schulen");
     }
 }

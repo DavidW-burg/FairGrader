@@ -85,7 +85,7 @@ else
                 // Änderungen im Browser-Storage speichern
                 await FairGrader.SaveSchulenToStorageAsync();
                 // Zurück zur Schule
-                NavigationManager.NavigateTo($"/schule/{schuleid}");
+                NavigationManager.NavigateTo($"schule/{schuleid}");
             }
             else {
                 ErrMsg = "Zug und Fach dürfen nicht leer sein!";
@@ -99,6 +99,6 @@ else
     private void OnCancel()
     {
         // Zurück zur Schule
-        NavigationManager.NavigateTo($"/schule/{schuleid}");
+        NavigationManager.NavigateTo($"schule/{schuleid}");
     }
 }

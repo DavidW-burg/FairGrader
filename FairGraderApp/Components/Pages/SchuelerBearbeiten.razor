@@ -155,7 +155,7 @@ else
                                                    Geschlecht);
 
                 // Zurück zur Klasse
-                NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}");
+                NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}");
             }
             else
             {
@@ -167,6 +167,6 @@ else
     private void OnCancel()
     {
         // Zurück zur Klasse
-        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}");
+        NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}");
     }
 }

@@ -64,7 +64,7 @@ else
 <!--                <li class="list-group-item d-flex justify-content-between align-items-center" -->
                 <li class="d-flex justify-content-between align-items-center"
                     style="cursor: pointer;"
-                    @onclick="@(() => NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/schueler/{schueler.Id}"))">
+                    @onclick="@(() => NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}/schueler/{schueler.Id}"))">
 
                     <div class="d-flex align-items-center">
                         <div>
@@ -132,32 +132,32 @@ else
 
     private void NewStudent()
     {
-        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/schueler/neu");
+        NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}/schueler/neu");
     }
 
     private void SchuelerBearbeiten(FG_Schueler schueler)
     {
-        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/schueler/bearbeiten/{schueler.Id}");
+        NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}/schueler/bearbeiten/{schueler.Id}");
     }
 
     private void SchuelerLoeschen(FG_Schueler schueler)
     {
-        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/schueler/loeschen/{schueler.Id}");
+        NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}/schueler/loeschen/{schueler.Id}");
     }
 
     private void BackToSchule()
     {
-        NavigationManager.NavigateTo($"/schule/{schuleid}");
+        NavigationManager.NavigateTo($"schule/{schuleid}");
     }
 
     private void BackToSchools()
     {
-        NavigationManager.NavigateTo("/schulen");
+        NavigationManager.NavigateTo("schulen");
     }
 
     private void OnFairGrade()
     {
-        NavigationManager.NavigateTo($"/schule/{schuleid}/klasse/{klasseid}/gradefair");
+        NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}/gradefair");
     }
     private void OnSchuelerListUpdate(SortableListEventArgs args)
     {
