@@ -1,10 +1,10 @@
-@page "/schule/{schuleid}/klasse/{klasseid}/schueler/bearbeiten/{schuelerId}"
+ï»¿@page "/schule/{schuleid}/klasse/{klasseid}/schueler/bearbeiten/{schuelerId}"
 @inject NavigationManager NavigationManager
 @inject FG_FairGrader FairGrader
 @inject IJSRuntime JSRuntime
 @using FairGraderApp.Models
 
-<PageTitle>Schüler bearbeiten</PageTitle>
+<PageTitle>SchÃ¼ler bearbeiten</PageTitle>
 
 @if (schule is null || klasse is null || schueler is null)
 {
@@ -15,12 +15,12 @@
                     <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
                 </svg>
             </div>
-            @(klasse?.Name ?? "Zurück")
+            @(klasse?.Name ?? "ZurÃ¼ck")
         </div>
     </button>
 
-    <h1>Schüler bearbeiten</h1>
-    <div class="alert alert-warning">Der angegebene Schüler, die Klasse oder Schule wurde nicht gefunden.</div>
+    <h1>SchÃ¼ler bearbeiten</h1>
+    <div class="alert alert-warning">Der angegebene SchÃ¼ler, die Klasse oder Schule wurde nicht gefunden.</div>
 }
 else
 {
@@ -31,11 +31,11 @@ else
                     <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
                 </svg>
             </div>
-            Zurück
+            ZurÃ¼ck
         </div>
     </button>
 
-    <h1>Schüler bearbeiten</h1>
+    <h1>SchÃ¼ler bearbeiten</h1>
 
     <div class="mb-3">
         <label class="form-label">Klasse: <strong>@klasse.Name</strong> (@schule.Name)</label>
@@ -56,7 +56,7 @@ else
         <label for="geschlecht" class="form-label">Geschlecht</label>
         <select id="geschlecht" class="form-select" @bind="Geschlecht">
             <option value="@FG_Geschlecht.not_def">Nicht definiert</option>
-            <option value="@FG_Geschlecht.male">Männlich</option>
+            <option value="@FG_Geschlecht.male">MÃ¤nnlich</option>
             <option value="@FG_Geschlecht.female">Weiblich</option>
         </select>
     </div>
@@ -67,7 +67,7 @@ else
             @if (!string.IsNullOrEmpty(FotoUrl))
             {
                 <div class="mb-2">
-                    <img src="@FotoUrl" alt="Schüler Foto" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                    <img src="@FotoUrl" alt="SchÃ¼ler Foto" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
                 </div>
             }
             <input type="url" id="foto" class="form-control" placeholder="Foto-URL eingeben..." @bind="FotoUrl" />
@@ -103,7 +103,7 @@ else
         {
             klasse = schule.Klassen.FirstOrDefault(k => string.Equals(k.Id, klasseid, StringComparison.OrdinalIgnoreCase));
 
-            // Schüler in der Klasse suchen
+            // SchÃ¼ler in der Klasse suchen
             if (klasse is not null)
             {
                 schueler = klasse.Schueler.FirstOrDefault(s => string.Equals(s.Id, schuelerId, StringComparison.OrdinalIgnoreCase));
@@ -125,7 +125,7 @@ else
         if (schule is not null && klasse is not null && schueler is not null && 
             !string.IsNullOrWhiteSpace(Name.Trim()) && !string.IsNullOrWhiteSpace(Vorname.Trim()))
         {
-            // Null-Check für alle IDs, um CS8604 zu vermeiden
+            // Null-Check fÃ¼r alle IDs, um CS8604 zu vermeiden
             if (schuleid is not null && klasseid is not null && schuelerId is not null)
             {
                 // Foto-URL validieren
@@ -134,12 +134,12 @@ else
                 {
                     if (Uri.TryCreate(FotoUrl.Trim(), UriKind.Absolute, out fotoUri))
                     {
-                        // URI ist gültig
+                        // URI ist gÃ¼ltig
                         schueler.Foto = fotoUri;
                     }
                     else
                     {
-                        schueler.Foto = null; // Ungültige URI wird entfernt
+                        schueler.Foto = null; // UngÃ¼ltige URI wird entfernt
                     }
                 }
                 else
@@ -154,19 +154,19 @@ else
                                                    Vorname.Trim(), 
                                                    Geschlecht);
 
-                // Zurück zur Klasse
+                // ZurÃ¼ck zur Klasse
                 NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}");
             }
             else
             {
-                await JSRuntime.InvokeVoidAsync("alert", "Fehler: Schule, Klasse oder Schüler nicht gefunden.");
+                await JSRuntime.InvokeVoidAsync("alert", "Fehler: Schule, Klasse oder SchÃ¼ler nicht gefunden.");
             }
         }
     }
 
     private void OnCancel()
     {
-        // Zurück zur Klasse
+        // ZurÃ¼ck zur Klasse
         NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}");
     }
 }

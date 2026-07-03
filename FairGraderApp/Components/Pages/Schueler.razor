@@ -1,9 +1,9 @@
-@page "/schule/{schuleid}/klasse/{klasseid}/schueler/{schuelerid}"
+Ôªø@page "/schule/{schuleid}/klasse/{klasseid}/schueler/{schuelerid}"
 @inject FG_FairGrader FairGrader
 @inject NavigationManager NavigationManager
 @using FairGraderApp.Models
 
-<PageTitle>Sch¸ler</PageTitle>
+<PageTitle>Sch√ºler</PageTitle>
 
 <button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="BackToKlasse">
     <div class="d-flex align-items-center">
@@ -12,13 +12,13 @@
                 <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
             </svg>
         </div>
-        @(klasse?.Name ?? "Zur¸ck")
+        @(klasse?.Name ?? "Zur√ºck")
     </div>
 </button>
 
 @if (schule is null || klasse is null || schueler is null)
 {
-    <h1>Sch¸ler nicht gefunden</h1>
+    <h1>Sch√ºler nicht gefunden</h1>
     <div class="alert alert-warning">Die angegebenen Daten konnten nicht geladen werden.</div>
 }
 else
@@ -42,14 +42,14 @@ else
         </div>
     }
 
-    <!--  Schalter f¸r m¸ndlich/schriftlich ¸ber der Button-Reihe -->
+    <!--  Schalter f√ºr m√ºndlich/schriftlich √ºber der Button-Reihe -->
     <div class="d-flex align-items-center mb-2">
         <span class="me-2">Schriftlich</span>
         <div class="form-check form-switch">
             <input class="form-check-input switch-colored" type="checkbox" id="bewertungsArtSwitch" @bind="selectedMuendlich" />
             <label class="form-check-label" for="bewertungsArtSwitch"></label>
         </div>
-        <span class="me-2">M¸ndlich</span>
+        <span class="me-2">M√ºndlich</span>
     </div>
 
     <style>
@@ -67,7 +67,7 @@ else
         }
     </style>
 
-    <!-- Neue Eingabezeile f¸r Bewertung: 6 quadratische Buttons (1-6) + Hinzuf¸gen -->
+    <!-- Neue Eingabezeile f√ºr Bewertung: 6 quadratische Buttons (1-6) + Hinzuf√ºgen -->
     <div class="d-flex align-items-center gap-2 mb-3">
         <div class="btn-group" role="group" aria-label="Notenauswahl">
             @for (var i = 1; i <= 6; i++)
@@ -84,7 +84,7 @@ else
         </div>
         <button type="button"
                 class="btn btn-primary"
-                title="Bewertung hinzuf¸gen"
+                title="Bewertung hinzuf√ºgen"
                 @onclick="AddBewertungAsync">
             +
         </button>
@@ -94,7 +94,7 @@ else
         }
         @if (addInfo is not null)
         {
-            <span class="ms-2" title="Erfolgreich hinzugef¸gt">
+            <span class="ms-2" title="Erfolgreich hinzugef√ºgt">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" aria-hidden="true" viewBox="0 0 16 16" fill="green">
                     <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0"/>
                     <path fill="#fff" d="M11.03 5.97a.75.75 0 0 1 0 1.06L7.56 10.5a.75.75 0 0 1-1.06 0L4.97 8.97a.75.75 0 0 1 1.06-1.06L7 8.88l2.97-2.91a.75.75 0 0 1 1.06 0z"/>
@@ -118,17 +118,17 @@ else
                 <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color:@bg;">
                     <div>
                         <span class="fw-semibold">Note: @b.Note</span>
-                        <small class="text-muted ms-2">@(b.Muendlich ? "m¸ndlich" : "schriftlich")</small>
+                        <small class="text-muted ms-2">@(b.Muendlich ? "m√ºndlich" : "schriftlich")</small>
                         <small class="text-muted ms-2">@b.DateTime.ToString("dd.MM.yyyy")</small>
                         @if (!string.IsNullOrWhiteSpace(b.Kommentar))
                         {
-                            <small class="text-muted ms-2">Ñ@b.Kommentarî</small>
+                            <small class="text-muted ms-2">‚Äû@b.Kommentar‚Äù</small>
                         }
                     </div>
                     <div class="d-flex gap-1">
                         <button type="button"
                                 class="btn btn-outline-danger btn-sm"
-                                title="Bewertung lˆschen"
+                                title="Bewertung l√∂schen"
                                 @onclick:stopPropagation="true"
                                 @onclick="@(() => DeleteBewertung(b))">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
@@ -188,20 +188,20 @@ else
 
         if (schueler is null)
         {
-            addError = "Sch¸ler nicht gefunden.";
+            addError = "Sch√ºler nicht gefunden.";
             return;
         }
 
         if (selectedNote is < 1 or > 6)
         {
-            addError = "Bitte zuerst eine Note (1ñ6) w‰hlen.";
+            addError = "Bitte zuerst eine Note (1‚Äì6) w√§hlen.";
             return;
         }
 
         var ok = schueler.AddBewertung(selectedNote, selectedMuendlich, "");
         if (!ok)
         {
-            addError = "Bewertung konnte nicht hinzugef¸gt werden (Pr¸fregeln beachten).";
+            addError = "Bewertung konnte nicht hinzugef√ºgt werden (Pr√ºfregeln beachten).";
             return;
         }
 

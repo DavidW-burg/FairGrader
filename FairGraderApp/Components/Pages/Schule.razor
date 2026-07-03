@@ -1,4 +1,4 @@
-@page "/schule/{id}"
+ï»¿@page "/schule/{id}"
 @inject FG_FairGrader FairGrader
 @inject NavigationManager NavigationManager
 @using FairGraderApp.Models
@@ -29,7 +29,7 @@ else
                 style="height:3.5rem; width:7rem;"
                 @onclick="NewClass">
             <span>Klasse</span>
-            <span>hinzufügen</span>
+            <span>hinzufÃ¼gen</span>
         </button>
     </div>
 
@@ -48,7 +48,7 @@ else
                     <div class="me-2">
                         <span class="fw-semibold">@klasse.Name</span>
                         <small class="text-muted ms-2">@klasse.Fach ,</small>
-                        <small class="text-muted ms-2">@klasse.Schueler.Count Schüler</small>
+                        <small class="text-muted ms-2">@klasse.Schueler.Count SchÃ¼ler</small>
                     </div>
                     <div class="d-flex gap-1">
                         <button type="button"
@@ -62,7 +62,7 @@ else
                         </button>
                         <button type="button"
                                 class="btn btn-outline-danger btn-sm"
-                                title="Klasse löschen"
+                                title="Klasse lÃ¶schen"
                                 @onclick:stopPropagation="true"
                                 @onclick="@(() => KlasseLoeschen(klasse))">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" aria-hidden="true" viewBox="0 0 16 16">
@@ -102,7 +102,7 @@ else
 
     private void KlasseLoeschen(FG_Klasse klasse)
     {
-        // Navigation zu Klasse löschen
+        // Navigation zu Klasse lÃ¶schen
         NavigationManager.NavigateTo($"schule/{id}/klasse/loeschen/{klasse.Id}");
     }
 

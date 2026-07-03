@@ -1,4 +1,4 @@
-@page "/"
+ï»¿@page "/"
 @page "/schulen"
 @inject FG_FairGrader FairGrader
 @inject IJSRuntime JSRuntime
@@ -14,7 +14,7 @@
             style="height:4.5rem; width:7rem;"
             @onclick="@(() => NavigationManager.NavigateTo("schulen/neu"))">
         <span>Schule</span>
-        <span>hinzufügen</span>
+        <span>hinzufÃ¼gen</span>
     </button>
 </div>
 
@@ -41,14 +41,14 @@ else {
                             title="Bearbeiten"
                             @onclick:stopPropagation="true"
                             @onclick="@(() => NavigationManager.NavigateTo($"schulen/bearbeiten/{s.Id}"))">
-                        <!-- SVG unverändert -->
+                        <!-- SVG unverÃ¤ndert -->
                     </button>
                     <button type="button"
                             class="btn btn-outline-danger btn-sm"
-                            title="Löschen"
+                            title="LÃ¶schen"
                             @onclick:stopPropagation="true"
                             @onclick="@(() => NavigationManager.NavigateTo($"schulen/loeschen/{Uri.EscapeDataString(s.Id)}"))">
-                        <!-- SVG unverändert -->
+                        <!-- SVG unverÃ¤ndert -->
                     </button>
                 </div>
             </li>

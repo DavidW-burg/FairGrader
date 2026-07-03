@@ -1,4 +1,4 @@
-@page "/schule/{schuleid}/klasse/bearbeiten/{klasseid}"
+ï»¿@page "/schule/{schuleid}/klasse/bearbeiten/{klasseid}"
 @inject NavigationManager NavigationManager
 @inject FG_FairGrader FairGrader
 @inject IJSRuntime JSRuntime
@@ -15,7 +15,7 @@
                 <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
             </svg>
         </div>
-        @(schule?.Name ?? "Zurück")
+        @(schule?.Name ?? "ZurÃ¼ck")
     </div>
 </button>
 
@@ -90,7 +90,7 @@ else
     {
         if (schule is not null && klasse is not null && !string.IsNullOrWhiteSpace(Klassenname.Trim()))
         {
-            // Null-Check für schuleid und klasseid, um CS8604 zu vermeiden
+            // Null-Check fÃ¼r schuleid und klasseid, um CS8604 zu vermeiden
             if (schule is not null && klasse is not null && schuleid is not null && klasseid is not null) {
                 await FairGrader.UpdateKlasseAsync(schuleid, 
                                                    klasseid, 
@@ -98,7 +98,7 @@ else
                                                    Zug.Trim(), 
                                                    Stufe, 
                                                    Fach.Trim());
-                // Zurück zur Schule
+                // ZurÃ¼ck zur Schule
                 NavigationManager.NavigateTo($"schule/{schuleid}");
             }
             else {
@@ -110,7 +110,7 @@ else
 
     private void OnCancel()
     {
-        // Zurück zur Schule
+        // ZurÃ¼ck zur Schule
         NavigationManager.NavigateTo($"schule/{schuleid}");
     }
 }

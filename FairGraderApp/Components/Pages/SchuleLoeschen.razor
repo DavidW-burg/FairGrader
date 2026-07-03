@@ -1,9 +1,9 @@
-@page "/schulen/loeschen/{id}"
+ï»¿@page "/schulen/loeschen/{id}"
 @inject FG_FairGrader FairGrader
 @inject NavigationManager NavigationManager
 @using FairGraderApp.Models
 
-<PageTitle>Schule löschen</PageTitle>
+<PageTitle>Schule lÃ¶schen</PageTitle>
 
 <button type="button" class="btn border-0 bg-transparent p-1 mb-3" @onclick="OnCancel">
     <div class="d-flex align-items-center">
@@ -16,7 +16,7 @@
     </div>
 </button>
 
-<h1>Schule mit allen Klassen- Infos löschen?</h1>
+<h1>Schule mit allen Klassen- Infos lÃ¶schen?</h1>
 
 @if (schule is null)
 {
@@ -31,12 +31,12 @@ else
                 <strong>Adresse:</strong><br />
                 @schule.Adresse
             </p>
-            @* Hier könnten Klassen/Infos angezeigt werden, falls im Modell vorhanden *@
+            @* Hier kÃ¶nnten Klassen/Infos angezeigt werden, falls im Modell vorhanden *@
         </div>
     </div>
 
     <div class="d-flex gap-2">
-        <button type="button" class="btn btn-danger" @onclick="JetztLoeschen">Jetzt löschen</button>
+        <button type="button" class="btn btn-danger" @onclick="JetztLoeschen">Jetzt lÃ¶schen</button>
     </div>
 }
 

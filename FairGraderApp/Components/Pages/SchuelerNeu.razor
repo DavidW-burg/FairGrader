@@ -1,4 +1,4 @@
-@page "/schule/{schuleid}/klasse/{klasseid}/schueler/neu"
+ï»¿@page "/schule/{schuleid}/klasse/{klasseid}/schueler/neu"
 @inject NavigationManager NavigationManager
 @inject FG_FairGrader FairGrader
 @inject IJSRuntime JSRuntime
@@ -11,15 +11,15 @@
                 <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
             </svg>
         </div>
-        @(klasse?.Name ?? "Zurück")
+        @(klasse?.Name ?? "ZurÃ¼ck")
     </div>
 </button>
 
-<PageTitle>Neuer Schüler</PageTitle>
+<PageTitle>Neuer SchÃ¼ler</PageTitle>
 
 @if (schule is null || klasse is null)
 {
-    <h1>Neuer Schüler</h1>
+    <h1>Neuer SchÃ¼ler</h1>
     <div class="alert alert-warning">Die angegebene Klasse oder Schule wurde nicht gefunden.</div>
 }
 else
@@ -43,7 +43,7 @@ else
         <label for="geschlecht" class="form-label">Geschlecht</label>
         <select id="geschlecht" class="form-select" @bind="Geschlecht">
             <option value="@FG_Geschlecht.not_def">Nicht angegeben</option>
-            <option value="@FG_Geschlecht.male">Männlich</option>
+            <option value="@FG_Geschlecht.male">MÃ¤nnlich</option>
             <option value="@FG_Geschlecht.female">Weiblich</option>
         </select>
     </div>
@@ -54,7 +54,7 @@ else
             @if (!string.IsNullOrEmpty(FotoUrl))
             {
                 <div class="mb-2">
-                    <img src="@FotoUrl" alt="Schüler Foto" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
+                    <img src="@FotoUrl" alt="SchÃ¼ler Foto" class="img-thumbnail" style="max-width: 150px; max-height: 150px;" />
                 </div>
             }
             <input type="url" id="foto" class="form-control" placeholder="Foto-URL eingeben..." @bind="FotoUrl" />
@@ -100,11 +100,11 @@ else
             {
                 if (Uri.TryCreate(FotoUrl.Trim(), UriKind.Absolute, out fotoUri))
                 {
-                    // URI ist gültig
+                    // URI ist gÃ¼ltig
                 }
                 else
                 {
-                    fotoUri = null; // Ungültige URI wird ignoriert
+                    fotoUri = null; // UngÃ¼ltige URI wird ignoriert
                 }
             }
 
@@ -116,17 +116,17 @@ else
                 fotoUri
             );
 
-            // Schüler zur Klasse hinzufügen
+            // SchÃ¼ler zur Klasse hinzufÃ¼gen
             await FairGrader.AddSchuelerAsync(schuleid!, klasseid!, neuerSchueler);
         }
 
-        // Zurück zur Klasse
+        // ZurÃ¼ck zur Klasse
         NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}");
     }
 
     private void OnCancel()
     {
-        // Zurück zur Klasse
+        // ZurÃ¼ck zur Klasse
         NavigationManager.NavigateTo($"schule/{schuleid}/klasse/{klasseid}");
     }
 }

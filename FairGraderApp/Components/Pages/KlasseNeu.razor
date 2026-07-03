@@ -1,4 +1,4 @@
-@page "/schule/{schuleid}/klasse/neu"
+ï»¿@page "/schule/{schuleid}/klasse/neu"
 @inject NavigationManager NavigationManager
 @inject FG_FairGrader FairGrader
 @inject IJSRuntime JSRuntime
@@ -13,7 +13,7 @@
                 <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
             </svg>
         </div>
-        @(schule?.Name ?? "Zurück")
+        @(schule?.Name ?? "ZurÃ¼ck")
     </div>
 </button>
 
@@ -80,15 +80,15 @@ else
                     Fach.Trim(),
                     FG_FairGrader.NewId()
                 );
-                // Klasse zur Schule hinzufügen
+                // Klasse zur Schule hinzufÃ¼gen
                 schule.Klassen.Add(neueKlasse);
-                // Änderungen im Browser-Storage speichern
+                // Ã„nderungen im Browser-Storage speichern
                 await FairGrader.SaveSchulenToStorageAsync();
-                // Zurück zur Schule
+                // ZurÃ¼ck zur Schule
                 NavigationManager.NavigateTo($"schule/{schuleid}");
             }
             else {
-                ErrMsg = "Zug und Fach dürfen nicht leer sein!";
+                ErrMsg = "Zug und Fach dÃ¼rfen nicht leer sein!";
             }
         else {
             ErrMsg = "Datenfehler!";
@@ -98,7 +98,7 @@ else
 
     private void OnCancel()
     {
-        // Zurück zur Schule
+        // ZurÃ¼ck zur Schule
         NavigationManager.NavigateTo($"schule/{schuleid}");
     }
 }
