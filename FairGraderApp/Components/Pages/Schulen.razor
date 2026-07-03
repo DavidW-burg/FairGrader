@@ -41,14 +41,14 @@ else {
                             title="Bearbeiten"
                             @onclick:stopPropagation="true"
                             @onclick="@(() => NavigationManager.NavigateTo($"schulen/bearbeiten/{s.Id}"))">
-                        <!-- SVG unverändert -->
+                        <EditIcon />
                     </button>
                     <button type="button"
                             class="btn btn-outline-danger btn-sm"
                             title="Löschen"
                             @onclick:stopPropagation="true"
                             @onclick="@(() => NavigationManager.NavigateTo($"schulen/loeschen/{Uri.EscapeDataString(s.Id)}"))">
-                        <!-- SVG unverändert -->
+                        <DeleteIcon />
                     </button>
                 </div>
             </li>

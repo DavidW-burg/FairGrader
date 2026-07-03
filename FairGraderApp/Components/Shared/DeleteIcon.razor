@@ -1,0 +1,14 @@
+﻿@* Zentrale SVG-Outline für den "Löschen"-Button (Papierkorb-Symbol). *@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@Size" height="@Size"
+     fill="@Fill"
+     aria-hidden="true"
+     viewBox="0 0 16 16">
+    <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h.5v7H6a.5.5 0 0 1-.5-.5v-6zM9.5 5.5a.5.5 0 0 1 .5-.5h.5v7H10a.5.5 0 0 1-.5-.5v-6z" />
+    <path d="M14 3h-3.5l-1-1h-3l-1 1H2v1h12V3zM3 5h10l-.7 8.4a2 2 0 0 1-2 1.6H5.7a2 2 0 0 1-2-1.6L3 5z" />
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 16;
+    [Parameter] public string Fill { get; set; } = "red";
+}
